@@ -79,7 +79,7 @@ def run_pipeline(user_id: str):
     # Entry point = deepest hierarchy level matching user's department
     dept_levels = [
         lvl for lvl in hierarchy_levels
-        if lvl.get("department") == user["department"]
+        if lvl.get("department") == user["department"].lower()
     ]
     if not dept_levels:
         # Fallback: use root
@@ -88,21 +88,6 @@ def run_pipeline(user_id: str):
         # Pick the deepest level (highest level_number) for this department
         entry_level = max(dept_levels, key=lambda x: x["level_number"])
 
-    # --- Step 4: BFS traversal ---
-    # t0 = time.time()
-    # # bfs_distances = run_bfs(entry_level["id"], hierarchy_levels)
-
-    # if user["role"] == "ADMIN":
-    #     bfs_distances = {lvl["id"]: 0 for lvl in hierarchy_levels}
-    # else:
-    #     bfs_distances = run_bfs(entry_level["id"], hierarchy_levels)
-
-
-    # bfs_ms = round((time.time() - t0) * 1000)
-
-    # reachable_level_ids = set(bfs_distances.keys())
-
-    # --- Step 4: BFS traversal ---
     t0 = time.time()
 
     no_dept_match = len(dept_levels) == 0
@@ -195,7 +180,7 @@ def add_user(user: NewUser):
         "org_id": "supra",
         "name": user.name,
         "role": user.role,
-        "department": user.department,
+        "department": user.department.lower(),
         "ceiling_level": user.ceiling_level,
         "write_ceiling": user.write_ceiling,
         "compliance_clearance": user.compliance_clearance or [],
