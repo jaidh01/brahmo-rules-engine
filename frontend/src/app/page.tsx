@@ -30,6 +30,7 @@ type PipelineResult = {
     after_check4: number; after_check5: number;
   };
   candidate_set: Node[];
+  reachable_level_ids: string[];
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -150,12 +151,16 @@ export default function Home() {
     : new Set();
 
   // For DAG: which level IDs are reachable?
-  const reachableIds = result ? new Set([
-    result.entry_point,
-    ...DAG_TREE.filter(n =>
-      result.candidate_set.some(c => c.hierarchy_level === n.level && (c.department === n.dept || c.department === null))
-    ).map(n => n.id)
-  ]) : new Set<string>();
+  // const reachableIds = result ? new Set([
+  //   result.entry_point,
+  //   ...DAG_TREE.filter(n =>
+  //     result.candidate_set.some(c => c.hierarchy_level === n.level && (c.department === n.dept || c.department === null))
+  //   ).map(n => n.id)
+  // ]) : new Set<string>();
+
+  const reachableIds = result
+    ? new Set(result.reachable_level_ids || [])
+    : new Set<string>();
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100 p-6">
@@ -295,7 +300,8 @@ export default function Home() {
                     {DAG_TREE.map(node => {
                       const isEntry = result.entry_point === node.id;
                       const isGlobal = (node as any).isGlobal;
-                      const isReachable = reachableIds.has(node.id) || isGlobal;
+                      // const isReachable = reachableIds.has(node.id) || isGlobal;
+                      const isReachable = !isGlobal && reachableIds.has(node.id);
                       return (
                         <div key={node.id} className="flex items-center gap-1"
                           style={{ paddingLeft: `${node.indent * 14}px` }}>

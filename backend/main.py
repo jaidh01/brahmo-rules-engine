@@ -89,14 +89,30 @@ def run_pipeline(user_id: str):
         entry_level = max(dept_levels, key=lambda x: x["level_number"])
 
     # --- Step 4: BFS traversal ---
-    t0 = time.time()
-    # bfs_distances = run_bfs(entry_level["id"], hierarchy_levels)
+    # t0 = time.time()
+    # # bfs_distances = run_bfs(entry_level["id"], hierarchy_levels)
 
-    if user["role"] == "ADMIN":
+    # if user["role"] == "ADMIN":
+    #     bfs_distances = {lvl["id"]: 0 for lvl in hierarchy_levels}
+    # else:
+    #     bfs_distances = run_bfs(entry_level["id"], hierarchy_levels)
+
+
+    # bfs_ms = round((time.time() - t0) * 1000)
+
+    # reachable_level_ids = set(bfs_distances.keys())
+
+    # --- Step 4: BFS traversal ---
+    t0 = time.time()
+
+    no_dept_match = len(dept_levels) == 0
+    broad_access_role = user["role"] in ("ADMIN", "AUDITOR", "QUALITY")
+
+    if broad_access_role and no_dept_match:
+        # No department match + broad role = access all levels (like ADMIN)
         bfs_distances = {lvl["id"]: 0 for lvl in hierarchy_levels}
     else:
         bfs_distances = run_bfs(entry_level["id"], hierarchy_levels)
-
 
     bfs_ms = round((time.time() - t0) * 1000)
 
@@ -162,7 +178,8 @@ def run_pipeline(user_id: str):
             "after_check4": filter_result["after_check4"],
             "after_check5": filter_result["after_check5"],
         },
-        "candidate_set": candidate_set
+        "candidate_set": candidate_set,
+        "reachable_level_ids": list(bfs_distances.keys()),
     }
 
 
